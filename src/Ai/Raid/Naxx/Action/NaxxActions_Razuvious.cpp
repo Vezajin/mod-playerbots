@@ -15,6 +15,10 @@ namespace
 constexpr uint32 SPELL_UNDERSTUDY_TAUNT = 29060;
 constexpr uint32 SPELL_BONE_BARRIER     = 29061;
 constexpr uint32 SPELL_BLOOD_STRIKE     = 61696;
+
+// mod-individual-progression's 40-man Naxxramas names the understudy "Deathknight Understudy".
+constexpr char const* UNDERSTUDY_NAME = "death knight understudy";
+constexpr char const* UNDERSTUDY_NAME_40 = "deathknight understudy";
 }
 
 bool RazuviousUseObedienceCrystalAction::Execute(Event /*event*/)
@@ -122,7 +126,8 @@ bool RazuviousUseObedienceCrystalAction::Execute(Event /*event*/)
                 Unit* unit = botAI->GetUnit(*i);
                 if (!unit)
                     continue;
-                if (botAI->EqualLowercaseName(unit->GetName(), "death knight understudy"))
+                if (botAI->EqualLowercaseName(unit->GetName(), UNDERSTUDY_NAME) ||
+                    botAI->EqualLowercaseName(unit->GetName(), UNDERSTUDY_NAME_40))
                 {
                     target = unit;
                     break;
@@ -146,7 +151,9 @@ bool RazuviousTargetAction::Execute(Event /*event*/)
         return false;
 
     Unit* razuvious = AI_VALUE2(Unit*, "find target", "instructor razuvious");
-    Unit* understudy = AI_VALUE2(Unit*, "find target", "death knight understudy");
+    Unit* understudy = AI_VALUE2(Unit*, "find target", UNDERSTUDY_NAME);
+    if (!understudy)
+        understudy = AI_VALUE2(Unit*, "find target", UNDERSTUDY_NAME_40);
     Unit* target = nullptr;
     if (PlayerbotAI::IsTank(bot))
         target = understudy;
