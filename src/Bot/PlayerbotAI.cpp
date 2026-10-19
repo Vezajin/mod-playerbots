@@ -4459,7 +4459,10 @@ bool PlayerbotAI::HasAuraToDispel(Unit* target, uint32 dispelType)
     if (!IsValidPlayer(bot))
         return false;
 
-    bool isFriend = bot->IsFriendlyTo(target);
+    // A friend under an enemy's mind control (Lucifron's Dominate Mind) is still dispelled as a friend; the core
+    // decides it by the original faction too (Unit::GetDispellableAuraList).
+    bool isFriend =
+        bot->IsFriendlyTo(target) || (target->IsCharmed() && target->GetReactionTo(bot, true) >= REP_FRIENDLY);
 
     Unit::VisibleAuraMap const* visibleAuras = target->GetVisibleAuras();
     if (!visibleAuras)
