@@ -27,6 +27,13 @@ class Aura;
 
 const uint32 NAXX_MAP_ID = 533;
 
+// 40-man Naxxramas from mod-individual-progression: map 533 run as 10-man heroic, which WotLK Naxxramas never uses.
+inline bool IsNaxx40(Player const* bot)
+{
+    Map const* map = bot->GetMap();
+    return map && map->GetId() == NAXX_MAP_ID && map->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC;
+}
+
 template <class BossAiType>
 class GenericBossHelper : public AiObject
 {
