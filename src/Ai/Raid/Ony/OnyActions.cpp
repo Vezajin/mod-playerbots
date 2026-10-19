@@ -11,6 +11,17 @@
 #include "Playerbots.h"
 #include "PositionAction.h"
 
+namespace
+{
+constexpr uint32 NPC_ONYXIAN_WHELP = 11262;
+constexpr uint32 NPC_ONYXIAN_WHELP_40 = 301001;  // mod-individual-progression's 40-man Onyxia
+
+bool IsOnyxianWhelp(Unit const* unit)
+{
+    return unit->GetEntry() == NPC_ONYXIAN_WHELP || unit->GetEntry() == NPC_ONYXIAN_WHELP_40;
+}
+}  // namespace
+
 bool RaidOnyxiaMoveToSideAction::Execute(Event /*event*/)
 {
     Unit* boss = AI_VALUE2(Unit*, "find target", "onyxia");
@@ -117,7 +128,7 @@ bool RaidOnyxiaKillWhelpsAction::Execute(Event /*event*/)
 {
     Unit* currentTarget = AI_VALUE(Unit*, "current target");
     // If already attacking a whelp, don't swap targets
-    if (currentTarget && currentTarget->GetEntry() == 11262)
+    if (currentTarget && IsOnyxianWhelp(currentTarget))
     {
         return false;
     }
@@ -128,7 +139,7 @@ bool RaidOnyxiaKillWhelpsAction::Execute(Event /*event*/)
         if (!unit || !unit->IsAlive() || !unit->IsInWorld())
             continue;
 
-        if (unit->GetEntry() == 11262)  // Onyxia Whelp
+        if (IsOnyxianWhelp(unit))
         {
             // bot->Yell("Attacking Whelps!", LANG_UNIVERSAL);
             return Attack(unit);
