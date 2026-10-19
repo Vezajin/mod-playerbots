@@ -7,6 +7,11 @@
 #include "Aq20Triggers.h"
 #include "Aq20Utils.h"
 
+namespace
+{
+constexpr float MOAM_DRAIN_MANA_PCT = 25.0f;
+}  // namespace
+
 bool Aq20MoveToCrystalTrigger::IsActive()
 {
     if (Unit* boss = AI_VALUE2(Unit*, "find target", "ossirian the unscarred"))
@@ -37,4 +42,16 @@ bool Aq20MoveToCrystalTrigger::IsActive()
         }
     }
     return false;
+}
+
+bool Aq20MoamHasManaTrigger::IsActive()
+{
+    // Moam drains the raid's mana and casts Arcane Eruption whenever his own is full, stone phase included. The
+    // DPS that can burn or drain mana keep it low; healers keep healing.
+    if ((!bot->IsClass(CLASS_PRIEST) && !bot->IsClass(CLASS_HUNTER) && !bot->IsClass(CLASS_WARLOCK)) ||
+        PlayerbotAI::IsHeal(bot))
+        return false;
+
+    Unit* boss = AI_VALUE2(Unit*, "find target", "moam");
+    return boss && boss->GetPowerPct(POWER_MANA) >= MOAM_DRAIN_MANA_PCT;
 }

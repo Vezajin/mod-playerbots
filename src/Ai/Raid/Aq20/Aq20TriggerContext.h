@@ -16,10 +16,12 @@ public:
     RaidAq20TriggerContext()
     {
         creators["aq20 move to crystal"] = &RaidAq20TriggerContext::move_to_crystal;
+        creators["aq20 moam has mana"] = &RaidAq20TriggerContext::moam_has_mana;
     }
 
 private:
     static Trigger* move_to_crystal(PlayerbotAI* botAI) { return new Aq20MoveToCrystalTrigger(botAI); }
+    static Trigger* moam_has_mana(PlayerbotAI* botAI) { return new Aq20MoamHasManaTrigger(botAI); }
 };
 
 #endif

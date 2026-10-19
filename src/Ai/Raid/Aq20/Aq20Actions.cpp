@@ -50,3 +50,38 @@ bool Aq20UseCrystalAction::Execute(Event /*event*/)
     }
     return false;
 }
+
+std::string const Aq20DrainMoamManaAction::GetDrainSpell() const
+{
+    switch (bot->getClass())
+    {
+        case CLASS_PRIEST:
+            return "mana burn";
+        case CLASS_HUNTER:
+            return "viper sting";
+        case CLASS_WARLOCK:
+            return "drain mana";
+        default:
+            return "";
+    }
+}
+
+bool Aq20DrainMoamManaAction::isUseful()
+{
+    Unit* boss = AI_VALUE2(Unit*, "find target", "moam");
+    std::string const spell = GetDrainSpell();
+    if (!boss || spell.empty())
+        return false;
+
+    // Viper Sting drains over time; one per hunter is enough.
+    if (spell == "viper sting" && botAI->HasAura(spell, boss, false, true))
+        return false;
+
+    return botAI->CanCastSpell(spell, boss);
+}
+
+bool Aq20DrainMoamManaAction::Execute(Event /*event*/)
+{
+    Unit* boss = AI_VALUE2(Unit*, "find target", "moam");
+    return boss && botAI->CastSpell(GetDrainSpell(), boss);
+}

@@ -17,4 +17,11 @@ public:
     Aq20MoveToCrystalTrigger(PlayerbotAI* botAI) : Trigger(botAI, "aq20 move to crystal") {}
     bool IsActive() override;
 };
+
+class Aq20MoamHasManaTrigger : public Trigger
+{
+public:
+    Aq20MoamHasManaTrigger(PlayerbotAI* botAI) : Trigger(botAI, "aq20 moam has mana") {}
+    bool IsActive() override;
+};
 #endif

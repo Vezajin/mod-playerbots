@@ -13,4 +13,8 @@ void RaidAq20Strategy::InitTriggers(std::vector<TriggerNode*>& triggers)
         new TriggerNode("aq20 move to crystal",
             { NextAction("aq20 use crystal", ACTION_RAID) }));
 
+    triggers.push_back(
+        new TriggerNode("aq20 moam has mana",
+            { NextAction("aq20 drain moam mana", ACTION_RAID) }));
+
 }

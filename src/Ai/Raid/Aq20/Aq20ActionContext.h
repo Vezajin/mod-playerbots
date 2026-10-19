@@ -17,10 +17,12 @@ public:
     RaidAq20ActionContext()
     {
         creators["aq20 use crystal"] = &RaidAq20ActionContext::use_crystal;
+        creators["aq20 drain moam mana"] = &RaidAq20ActionContext::drain_moam_mana;
     }
 
 private:
     static Action* use_crystal(PlayerbotAI* botAI) { return new Aq20UseCrystalAction(botAI); }
+    static Action* drain_moam_mana(PlayerbotAI* botAI) { return new Aq20DrainMoamManaAction(botAI); }
 };
 
 #endif

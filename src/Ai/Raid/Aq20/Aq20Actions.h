@@ -17,4 +17,15 @@ public:
     Aq20UseCrystalAction(PlayerbotAI* botAI, std::string const name = "aq20 use crystal") : MovementAction(botAI, name) {}
     bool Execute(Event event) override;
 };
+
+class Aq20DrainMoamManaAction : public Action
+{
+public:
+    Aq20DrainMoamManaAction(PlayerbotAI* botAI) : Action(botAI, "aq20 drain moam mana") {}
+    bool isUseful() override;
+    bool Execute(Event event) override;
+
+private:
+    std::string const GetDrainSpell() const;
+};
 #endif
