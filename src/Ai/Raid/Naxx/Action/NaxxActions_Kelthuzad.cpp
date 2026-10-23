@@ -136,17 +136,13 @@ bool KelthuzadPositionAction::Execute(Event /*event*/)
             }
             else if (PlayerbotAI::IsRanged(bot))
             {
+                // Rings of 8 slots at 20 and 32 yd; ranged 17-32 get rings at 26 and 38 yd, turned half a slot,
+                // so everyone stays more than 10 yd (Mana Detonation) apart.
+                static constexpr float ringDistance[] = {20.0f, 32.0f, 26.0f, 38.0f};
                 uint32 index = botAI->GetRangedIndex(bot);
-                if (index < 8)
-                {
-                    distance = 20.0f;
-                    angle = index * M_PI / 4;
-                }
-                else
-                {
-                    distance = 32.0f;
-                    angle = (index - 8) * M_PI / 4;
-                }
+                uint32 ring = (index / 8) % 4;
+                distance = ringDistance[ring];
+                angle = (index % 8) * M_PI / 4 + (ring >= 2 ? M_PI / 8 : 0.0f);
                 float dx, dy;
                 dx = helper.center.first + cos(angle) * distance;
                 dy = helper.center.second + sin(angle) * distance;
