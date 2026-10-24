@@ -632,6 +632,9 @@ public:
     std::unordered_set<uint32> lowPriorityQuest;
     time_t bgReleaseAttemptTime = 0;
     ForceRebuffState forceRebuff;
+    // True while an action runs for a chat command a player sent, or inside one that does. The "silent" strategy
+    // lets tells through only then.
+    bool replyingToPlayer = false;
 
     // Schedules a callback to run once after <delayMs> milliseconds.
     void AddTimedEvent(std::function<void()> callback, uint32 delayMs);

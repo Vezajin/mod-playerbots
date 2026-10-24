@@ -1395,6 +1395,8 @@ Playerbots.RandomBotNonCombatStrategies = ""
 # Additional altbot strategies
 # Strategies added here are applied to all altbots, in addition (or subtraction) to spec/role-based default strategies.
 # These rules are processed after the defaults.
+# Example for NonCombatStrategies: "+silent" keeps altbots from whispering you unless you asked (they still answer
+# commands). In the game, "nc +silent" or "nc -silent" to a bot or to the party turns it on or off for that bot.
 Playerbots.CombatStrategies = ""
 Playerbots.NonCombatStrategies = ""
 

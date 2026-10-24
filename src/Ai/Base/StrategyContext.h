@@ -47,6 +47,7 @@
 #include "ReturnStrategy.h"
 #include "RpgStrategy.h"
 #include "RunawayStrategy.h"
+#include "SilentStrategy.h"
 #include "StayStrategy.h"
 #include "TankAssistStrategy.h"
 #include "TellTargetStrategy.h"
@@ -97,6 +98,7 @@ public:
         creators["map"] = &StrategyContext::map;
         creators["map full"] = &StrategyContext::map_full;
         creators["sit"] = &StrategyContext::sit;
+        creators["silent"] = &StrategyContext::silent;
         creators["mark rti"] = &StrategyContext::mark_rti;
         creators["adds"] = &StrategyContext::possible_adds;
         creators["pull back"] = &StrategyContext::pull_back;
@@ -176,6 +178,7 @@ private:
     static Strategy* map(PlayerbotAI* botAI) { return new MapStrategy(botAI); }
     static Strategy* map_full(PlayerbotAI* botAI) { return new MapFullStrategy(botAI); }
     static Strategy* sit(PlayerbotAI* botAI) { return new SitStrategy(botAI); }
+    static Strategy* silent(PlayerbotAI* botAI) { return new SilentStrategy(botAI); }
     static Strategy* possible_adds(PlayerbotAI* botAI) { return new PossibleAddsStrategy(botAI); }
     static Strategy* pull_back(PlayerbotAI* botAI) { return new PullBackStrategy(botAI); }
     static Strategy* mount(PlayerbotAI* botAI) { return new MountStrategy(botAI); }

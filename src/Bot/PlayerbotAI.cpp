@@ -3162,6 +3162,9 @@ bool PlayerbotAI::IsTellAllowed(PlayerbotSecurityLevel securityLevel)
     if (!master || master->IsBeingTeleported())
         return false;
 
+    if (!replyingToPlayer && HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT))
+        return false;
+
     if (!GetSecurity()->CheckLevelFor(securityLevel, true, master))
         return false;
 

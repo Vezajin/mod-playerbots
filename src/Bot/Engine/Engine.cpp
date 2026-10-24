@@ -597,10 +597,16 @@ bool Engine::ListenAndExecute(Action* action, Event event)
         return actionExecuted;
     }
 
+    // An action that runs for a player's chat command, or inside one that does, answers that player.
+    bool const wasReplyingToPlayer = botAI->replyingToPlayer;
+    botAI->replyingToPlayer = wasReplyingToPlayer || event.getOwner() != nullptr;
+
     if (actionExecutionListeners.Before(action, event))
     {
         actionExecuted = actionExecutionListeners.AllowExecution(action, event) ? action->Execute(event) : true;
     }
+
+    botAI->replyingToPlayer = wasReplyingToPlayer;
 
     if (botAI->HasStrategy("debug", BOT_STATE_NON_COMBAT))
     {
