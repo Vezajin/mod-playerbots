@@ -112,6 +112,11 @@ bool BwlDeathTalonWyrmguardTankTrigger::IsActive()
     return PlayerbotAI::IsTank(bot) && !GetWyrmguardAttackers(botAI).empty();
 }
 
+bool BwlDeathTalonWyrmguardSplitTrigger::IsActive()
+{
+    return PlayerbotAI::IsTank(bot) && GetWyrmguardToTaunt(bot, GetWyrmguardAttackers(botAI));
+}
+
 bool BwlDeathTalonWyrmguardRangedTrigger::IsActive()
 {
     return PlayerbotAI::IsRanged(bot) && !GetWyrmguardAttackers(botAI).empty();

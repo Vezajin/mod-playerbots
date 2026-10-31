@@ -100,6 +100,13 @@ public:
     bool IsActive() override;
 };
 
+class BwlDeathTalonWyrmguardSplitTrigger : public Trigger
+{
+public:
+    BwlDeathTalonWyrmguardSplitTrigger(PlayerbotAI* botAI) : Trigger(botAI, "bwl death talon wyrmguard split") {}
+    bool IsActive() override;
+};
+
 class BwlDeathTalonWyrmguardRangedTrigger : public Trigger
 {
 public:

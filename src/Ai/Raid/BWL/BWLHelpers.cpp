@@ -148,6 +148,32 @@ namespace BlackwingLairHelpers
         return true;
     }
 
+    // For a tank without a Wyrmguard: one on a non-tank, or one from a tank that holds several.
+    Unit* GetWyrmguardToTaunt(Player* bot, std::vector<Unit*> const& wyrmguards)
+    {
+        for (Unit const* wyrmguard : wyrmguards)
+        {
+            if (wyrmguard->GetVictim() == bot)
+                return nullptr;
+        }
+
+        for (Unit* wyrmguard : wyrmguards)
+        {
+            if (!IsHeldByTank(wyrmguard))
+                return wyrmguard;
+        }
+
+        for (size_t i = 0; i < wyrmguards.size(); ++i)
+        {
+            for (size_t j = i + 1; j < wyrmguards.size(); ++j)
+            {
+                if (wyrmguards[i]->GetVictim() == wyrmguards[j]->GetVictim())
+                    return wyrmguards[j];
+            }
+        }
+        return nullptr;
+    }
+
     std::vector<Unit*> GetUnengagedDrakes(Player* bot)
     {
         std::vector<Unit*> drakes;

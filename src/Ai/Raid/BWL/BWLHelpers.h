@@ -71,6 +71,7 @@ namespace BlackwingLairHelpers
     bool IsHeldByTank(Unit const* unit);
     std::vector<Unit*> GetWyrmguardAttackers(PlayerbotAI* botAI);
     bool AreWyrmguardsSplit(Player* bot, std::vector<Unit*> const& wyrmguards);
+    Unit* GetWyrmguardToTaunt(Player* bot, std::vector<Unit*> const& wyrmguards);
     bool IsNearUnengagedDrake(std::vector<Unit*> const& drakes, float x, float y);
     std::vector<Unit*> GetUnengagedDrakes(Player* bot);
 }

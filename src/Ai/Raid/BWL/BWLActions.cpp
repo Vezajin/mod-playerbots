@@ -301,6 +301,18 @@ bool BwlUseHourglassSandAction::Execute(Event /*event*/)
 
 static constexpr float WYRMGUARD_SAFE_DISTANCE = 16.0f;
 
+bool BwlDeathTalonWyrmguardTauntAction::Execute(Event event)
+{
+    Unit* wyrmguard = GetWyrmguardToTaunt(bot, GetWyrmguardAttackers(botAI));
+    if (!wyrmguard)
+        return false;
+
+    if (AI_VALUE(Unit*, "current target") != wyrmguard && !Attack(wyrmguard))
+        return false;
+
+    return botAI->DoSpecificAction("taunt spell", event, true);
+}
+
 bool BwlDeathTalonWyrmguardMoveAwayAction::MoveAwayFromWyrmguard(Unit* wyrmguard, float distance)
 {
     std::vector<Unit*> const drakes = GetUnengagedDrakes(bot);

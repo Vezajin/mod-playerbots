@@ -55,6 +55,8 @@ void RaidBwlStrategy::InitTriggers(std::vector<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode("bwl nefarian wild magic", {
         NextAction("ice block", ACTION_RAID) }));
 
+    triggers.push_back(new TriggerNode("bwl death talon wyrmguard split", {
+        NextAction("bwl death talon wyrmguard taunt", ACTION_RAID + 1) }));
     triggers.push_back(new TriggerNode("bwl death talon wyrmguard tank", {
         NextAction("bwl death talon wyrmguard tank move away", ACTION_RAID) }));
     triggers.push_back(new TriggerNode("bwl death talon wyrmguard ranged", {

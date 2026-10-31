@@ -89,6 +89,13 @@ public:
 
 // Trash
 
+class BwlDeathTalonWyrmguardTauntAction : public AttackAction
+{
+public:
+    BwlDeathTalonWyrmguardTauntAction(PlayerbotAI* botAI) : AttackAction(botAI, "bwl death talon wyrmguard taunt") {}
+    bool Execute(Event event) override;
+};
+
 class BwlDeathTalonWyrmguardMoveAwayAction : public MovementAction
 {
 public:
