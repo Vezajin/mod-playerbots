@@ -296,11 +296,11 @@ public:
         CastSpellAction(botAI, "lightning bolt") {}
 };
 
-class CastThunderstormAction : public CastSpellAction
+class CastThunderstormAction : public CastKnockbackSpellAction
 {
 public:
     CastThunderstormAction(PlayerbotAI* botAI) :
-        CastSpellAction(botAI, "thunderstorm") {}
+        CastKnockbackSpellAction(botAI, "thunderstorm") {}
 };
 
 class CastLavaBurstAction : public CastSpellAction

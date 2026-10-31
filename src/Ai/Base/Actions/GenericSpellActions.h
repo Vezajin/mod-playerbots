@@ -40,6 +40,22 @@ protected:
     float range;
 };
 
+// A knockback scatters what the tank is holding, so a bot in a dungeon or raid leaves it out of its rotation, unless
+// noKnockbackGlyph has taken the knockback off the spell. Encounter code that needs one casts the spell itself.
+class CastKnockbackSpellAction : public CastSpellAction
+{
+public:
+    CastKnockbackSpellAction(PlayerbotAI* botAI, std::string const spell, uint32 noKnockbackGlyph = 0)
+        : CastSpellAction(botAI, spell), noKnockbackGlyph(noKnockbackGlyph)
+    {
+    }
+
+    bool isUseful() override;
+
+private:
+    uint32 noKnockbackGlyph;
+};
+
 class CastAuraSpellAction : public CastSpellAction
 {
 public:

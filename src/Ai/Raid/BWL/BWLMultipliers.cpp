@@ -8,6 +8,7 @@
 #include "BWLActions.h"
 #include "BWLHelpers.h"
 #include "ChooseTargetActions.h"
+#include "GenericSpellActions.h"
 #include "HunterActions.h"
 #include "Playerbots.h"
 #include "ReachTargetActions.h"
@@ -16,6 +17,8 @@ using namespace BlackwingLairHelpers;
 
 static constexpr float VAELASTRASZ_BA_SAFE_DISTANCE = 20.0f;
 static constexpr float VAELASTRASZ_BA_BOSS_DISTANCE = 30.0f;
+static constexpr uint32 WYRMGUARD_HOLD_LIMIT_MS = 8 * IN_MILLISECONDS;
+static constexpr uint32 WYRMGUARD_HOLD_RESET_MS = 120 * IN_MILLISECONDS;
 
 float RazorgoreTankMultiplier::GetValue(Action* action)
 {
@@ -86,4 +89,26 @@ float VaelastraszBurningAdrenalineMultiplier::GetValue(Action* action)
     }
 
     return 1.0f;
+}
+
+float DeathTalonWyrmguardDpsHoldMultiplier::GetValue(Action* action)
+{
+    if (PlayerbotAI::IsTank(bot) || botAI->GetState() == BOT_STATE_NON_COMBAT)
+        return 1.0f;
+
+    if (!dynamic_cast<AttackAction*>(action) &&
+        (!dynamic_cast<CastSpellAction*>(action) || dynamic_cast<CastHealingSpellAction*>(action)))
+        return 1.0f;
+
+    if (!IsDeathTalonWyrmguard(action->GetTarget()))
+        return 1.0f;
+
+    if (AreWyrmguardsSplit(bot, GetWyrmguardAttackers(botAI)))
+        return 1.0f;
+
+    uint32 const now = getMSTime();
+    if (!holdStartedMs || getMSTimeDiff(holdStartedMs, now) >= WYRMGUARD_HOLD_RESET_MS)
+        holdStartedMs = now;
+
+    return getMSTimeDiff(holdStartedMs, now) < WYRMGUARD_HOLD_LIMIT_MS ? 0.0f : 1.0f;
 }

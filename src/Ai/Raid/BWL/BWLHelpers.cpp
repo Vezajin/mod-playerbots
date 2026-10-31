@@ -7,9 +7,16 @@
 #include "BWLHelpers.h"
 #include "AiObjectContext.h"
 #include "Group.h"
+#include "Playerbots.h"
 
 namespace BlackwingLairHelpers
 {
+    // Two tanks closer than this share a Wyrmguard's Cleave and War Stomp.
+    static constexpr float WYRMGUARD_SPLIT_DISTANCE = 10.0f;
+    static constexpr float DRAKE_SEARCH_RANGE = 80.0f;
+    // A step that ends inside this is a step towards pulling the drake too.
+    static constexpr float DRAKE_SAFE_DISTANCE = 35.0f;
+
     bool IsActiveSuppressionDeviceInRange(GameObject const* go, Player const* bot)
     {
         constexpr float suppressionDeviceInteractionDistance = 15.0f;
@@ -68,5 +75,78 @@ namespace BlackwingLairHelpers
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_GREEN_WHELP) ||
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_BLUE_WHELP) ||
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_BRONZE_WHELP);
+    }
+
+    bool IsDeathTalonWyrmguard(Unit const* unit)
+    {
+        return unit && unit->GetEntry() == static_cast<uint32>(BlackwingLairNPCs::NPC_DEATH_TALON_WYRMGUARD);
+    }
+
+    bool IsHeldByTank(Unit const* unit)
+    {
+        Unit* victim = unit->GetVictim();
+        Player* victimPlayer = victim ? victim->ToPlayer() : nullptr;
+        return victimPlayer && PlayerbotAI::IsTank(victimPlayer);
+    }
+
+    std::vector<Unit*> GetWyrmguardAttackers(PlayerbotAI* botAI)
+    {
+        std::vector<Unit*> wyrmguards;
+        for (ObjectGuid const guid : botAI->GetAiObjectContext()->GetValue<GuidVector>("attackers")->Get())
+        {
+            Unit* unit = botAI->GetUnit(guid);
+            if (IsDeathTalonWyrmguard(unit) && unit->IsAlive())
+                wyrmguards.push_back(unit);
+        }
+        return wyrmguards;
+    }
+
+    // Every Wyrmguard is on a tank, and with a tank for each they are on different tanks and apart.
+    bool AreWyrmguardsSplit(Player* bot, std::vector<Unit*> const& wyrmguards)
+    {
+        std::vector<Unit*> holders;
+        for (Unit const* wyrmguard : wyrmguards)
+        {
+            if (!IsHeldByTank(wyrmguard))
+                return false;
+            holders.push_back(wyrmguard->GetVictim());
+        }
+
+        if (PlayerbotAI::GetGroupTankNum(bot) < wyrmguards.size())
+            return true;
+
+        for (size_t i = 0; i < wyrmguards.size(); ++i)
+        {
+            for (size_t j = i + 1; j < wyrmguards.size(); ++j)
+            {
+                if (holders[i] == holders[j] ||
+                    wyrmguards[i]->GetDistance2d(wyrmguards[j]) < WYRMGUARD_SPLIT_DISTANCE)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    std::vector<Unit*> GetUnengagedDrakes(Player* bot)
+    {
+        std::vector<Unit*> drakes;
+        for (BlackwingLairNPCs const npc : { BlackwingLairNPCs::NPC_FIREMAW, BlackwingLairNPCs::NPC_FLAMEGOR,
+                                             BlackwingLairNPCs::NPC_EBONROC, BlackwingLairNPCs::NPC_CHROMAGGUS })
+        {
+            Creature* drake = bot->FindNearestCreature(static_cast<uint32>(npc), DRAKE_SEARCH_RANGE);
+            if (drake && !drake->IsInCombat())
+                drakes.push_back(drake);
+        }
+        return drakes;
+    }
+
+    bool IsNearUnengagedDrake(std::vector<Unit*> const& drakes, float x, float y)
+    {
+        for (Unit const* drake : drakes)
+        {
+            if (drake->GetDistance2d(x, y) < DRAKE_SAFE_DISTANCE)
+                return true;
+        }
+        return false;
     }
 }

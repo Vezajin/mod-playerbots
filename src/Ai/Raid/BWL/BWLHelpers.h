@@ -9,6 +9,7 @@
 
 #include "Player.h"
 #include "PlayerbotAI.h"
+#include <vector>
 
 namespace BlackwingLairHelpers
 {
@@ -48,6 +49,12 @@ namespace BlackwingLairHelpers
         NPC_CORRUPTED_BLUE_WHELP = 14024,
         NPC_CORRUPTED_BRONZE_WHELP = 14025,
 
+        // Black drakes and Chromaggus
+        NPC_FIREMAW = 11983,
+        NPC_FLAMEGOR = 11981,
+        NPC_EBONROC = 14601,
+        NPC_CHROMAGGUS = 14020,
+
         // Trash
         NPC_DEATH_TALON_WYRMGUARD = 12460
     };
@@ -59,6 +66,12 @@ namespace BlackwingLairHelpers
     bool IsRazorgoreOffTank(Player* bot);
     bool IsNonBABotNearPosition(Player const* bot, Position const& position, float distance);
     bool IsCorruptedWhelp(Unit const* unit);
+    bool IsDeathTalonWyrmguard(Unit const* unit);
+    bool IsHeldByTank(Unit const* unit);
+    std::vector<Unit*> GetWyrmguardAttackers(PlayerbotAI* botAI);
+    bool AreWyrmguardsSplit(Player* bot, std::vector<Unit*> const& wyrmguards);
+    bool IsNearUnengagedDrake(std::vector<Unit*> const& drakes, float x, float y);
+    std::vector<Unit*> GetUnengagedDrakes(Player* bot);
 }
 
 #endif

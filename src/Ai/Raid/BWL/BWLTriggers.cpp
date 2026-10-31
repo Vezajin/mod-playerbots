@@ -109,10 +109,10 @@ bool BwlNefarianWildMagicTrigger::IsActive()
 
 bool BwlDeathTalonWyrmguardTankTrigger::IsActive()
 {
-    return PlayerbotAI::IsTank(bot) && AI_VALUE2(Unit*, "find target", "death talon wyrmguard");
+    return PlayerbotAI::IsTank(bot) && !GetWyrmguardAttackers(botAI).empty();
 }
 
 bool BwlDeathTalonWyrmguardRangedTrigger::IsActive()
 {
-    return PlayerbotAI::IsRanged(bot) && AI_VALUE2(Unit*, "find target", "death talon wyrmguard");
+    return PlayerbotAI::IsRanged(bot) && !GetWyrmguardAttackers(botAI).empty();
 }

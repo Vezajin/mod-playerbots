@@ -180,6 +180,14 @@ bool CastSpellAction::Execute(Event /*event*/)
     return botAI->CastSpell(spell, GetTarget());
 }
 
+bool CastKnockbackSpellAction::isUseful()
+{
+    if (bot->GetMap()->IsDungeon() && !(noKnockbackGlyph && bot->HasAura(noKnockbackGlyph)))
+        return false;
+
+    return CastSpellAction::isUseful();
+}
+
 bool CastSpellAction::isUseful()
 {
     if (botAI->IsInVehicle() && !botAI->IsInVehicle(false, false, true))
