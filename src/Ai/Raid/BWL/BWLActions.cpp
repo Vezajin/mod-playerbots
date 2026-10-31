@@ -319,7 +319,7 @@ bool BwlDeathTalonWyrmguardMoveAwayAction::MoveAwayFromWyrmguard(Unit* wyrmguard
                                                             bot->GetPositionZ(), x, y, z))
             continue;
 
-        if (MoveTo(bot->GetMapId(), x, y, z, false, false, true, true, MovementPriority::MOVEMENT_COMBAT))
+        if (MoveTo(bot->GetMapId(), x, y, z, false, false, true, true, MovementPriority::MOVEMENT_FORCED, true))
             return true;
     }
     return false;
