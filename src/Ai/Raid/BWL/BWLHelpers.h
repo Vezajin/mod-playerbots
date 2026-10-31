@@ -66,6 +66,7 @@ namespace BlackwingLairHelpers
     bool IsRazorgoreOffTank(Player* bot);
     bool IsNonBABotNearPosition(Player const* bot, Position const& position, float distance);
     bool IsCorruptedWhelp(Unit const* unit);
+    bool HasNoRouteTo(Player* bot, Unit const* unit);
     bool IsDeathTalonWyrmguard(Unit const* unit);
     bool IsHeldByTank(Unit const* unit);
     std::vector<Unit*> GetWyrmguardAttackers(PlayerbotAI* botAI);

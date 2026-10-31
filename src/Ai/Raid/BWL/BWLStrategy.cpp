@@ -90,12 +90,19 @@ void RaidBwlStrategy::AppendWyrmguardTankExclusions(GuidSet& exclusions)
 
 void RaidBwlStrategy::AppendTargetExclusions(GuidSet& exclusions, TargetValueExclusionType type)
 {
+    AiObjectContext* context = botAI->GetAiObjectContext();
+    for (ObjectGuid const guid : AI_VALUE(GuidVector, "attackers"))
+    {
+        Unit* unit = botAI->GetUnit(guid);
+        if (unit && BlackwingLairHelpers::HasNoRouteTo(botAI->GetBot(), unit))
+            exclusions.insert(guid);
+    }
+
     if (type != TargetValueExclusionType::TankTarget)
         return;
 
     AppendWyrmguardTankExclusions(exclusions);
 
-    AiObjectContext* context = botAI->GetAiObjectContext();
     if (Unit* broodlord = AI_VALUE2(Unit*, "find target", "broodlord lashlayer"))
     {
         Unit* bossVictim = broodlord->GetVictim();

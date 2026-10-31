@@ -7,10 +7,14 @@
 #include "BWLHelpers.h"
 #include "AiObjectContext.h"
 #include "Group.h"
+#include "PathGenerator.h"
 #include "Playerbots.h"
 
 namespace BlackwingLairHelpers
 {
+    static constexpr float ROUTE_END_Z_TOLERANCE = 6.0f;
+    static constexpr float ROUTE_MAX_DETOUR = 2.0f;
+    static constexpr float ROUTE_DETOUR_SLACK = 30.0f;
     // Two tanks closer than this share a Wyrmguard's Cleave and War Stomp.
     static constexpr float WYRMGUARD_SPLIT_DISTANCE = 10.0f;
     static constexpr float DRAKE_SEARCH_RANGE = 80.0f;
@@ -75,6 +79,23 @@ namespace BlackwingLairHelpers
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_GREEN_WHELP) ||
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_BLUE_WHELP) ||
             entry == static_cast<uint32>(BlackwingLairNPCs::NPC_CORRUPTED_BRONZE_WHELP);
+    }
+
+    // BWL's halls run over and under each other, and a mob on the far side can be in combat with the raid. A path that
+    // ends on another floor or goes the long way round means the mob is not this bot's to chase, and a player's spline
+    // would take the straight line through the wall.
+    bool HasNoRouteTo(Player* bot, Unit const* unit)
+    {
+        if (bot->IsWithinLOSInMap(unit))
+            return false;
+
+        PathGenerator path(bot);
+        path.CalculatePath(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
+        if (path.GetPathType() != PATHFIND_NORMAL || path.GetPath().empty())
+            return true;
+
+        return std::fabs(path.GetPath().back().z - unit->GetPositionZ()) > ROUTE_END_Z_TOLERANCE ||
+               path.getPathLength() > bot->GetDistance(unit) * ROUTE_MAX_DETOUR + ROUTE_DETOUR_SLACK;
     }
 
     bool IsDeathTalonWyrmguard(Unit const* unit)
