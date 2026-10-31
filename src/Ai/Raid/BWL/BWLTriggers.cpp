@@ -109,10 +109,26 @@ bool BwlNefarianWildMagicTrigger::IsActive()
 
 bool BwlDeathTalonWyrmguardTankTrigger::IsActive()
 {
-    return PlayerbotAI::IsTank(bot) && AI_VALUE2(Unit*, "find target", "death talon wyrmguard");
+    return PlayerbotAI::IsTank(bot) && !GetWyrmguardAttackers(botAI).empty();
+}
+
+bool BwlDeathTalonWyrmguardWrongTargetTrigger::IsActive()
+{
+    if (!PlayerbotAI::IsTank(bot))
+        return false;
+
+    // Aiming at another tank's Wyrmguard, reach melee and the move away would take turns.
+    Unit const* target = AI_VALUE(Unit*, "current target");
+    return IsDeathTalonWyrmguard(target) && target->GetVictim() != bot && IsHeldByTank(target) &&
+           GetOwnWyrmguard(bot, GetWyrmguardAttackers(botAI));
+}
+
+bool BwlDeathTalonWyrmguardNoneHeldTrigger::IsActive()
+{
+    return PlayerbotAI::IsTank(bot) && GetWyrmguardToTaunt(bot, GetWyrmguardAttackers(botAI));
 }
 
 bool BwlDeathTalonWyrmguardRangedTrigger::IsActive()
 {
-    return PlayerbotAI::IsRanged(bot) && AI_VALUE2(Unit*, "find target", "death talon wyrmguard");
+    return PlayerbotAI::IsRanged(bot) && !GetWyrmguardAttackers(botAI).empty();
 }

@@ -40,6 +40,9 @@ public:
         creators["bwl nefarian wild magic"] = &RaidBwlTriggerContext::bwl_nefarian_wild_magic;
 
         creators["bwl death talon wyrmguard tank"] = &RaidBwlTriggerContext::bwl_death_talon_wyrmguard_tank;
+        creators["bwl death talon wyrmguard wrong target"] =
+            &RaidBwlTriggerContext::bwl_death_talon_wyrmguard_wrong_target;
+        creators["bwl death talon wyrmguard none held"] = &RaidBwlTriggerContext::bwl_death_talon_wyrmguard_none_held;
         creators["bwl death talon wyrmguard ranged"] = &RaidBwlTriggerContext::bwl_death_talon_wyrmguard_ranged;
     }
 
@@ -61,6 +64,14 @@ private:
     static Trigger* bwl_nefarian_wild_magic(PlayerbotAI* botAI) { return new BwlNefarianWildMagicTrigger(botAI); }
     static Trigger* bwl_nefarian_positioning(PlayerbotAI* botAI) { return new BwlNefarianPositioningTrigger(botAI); }
     static Trigger* bwl_death_talon_wyrmguard_tank(PlayerbotAI* botAI) { return new BwlDeathTalonWyrmguardTankTrigger(botAI); }
+    static Trigger* bwl_death_talon_wyrmguard_wrong_target(PlayerbotAI* botAI)
+    {
+        return new BwlDeathTalonWyrmguardWrongTargetTrigger(botAI);
+    }
+    static Trigger* bwl_death_talon_wyrmguard_none_held(PlayerbotAI* botAI)
+    {
+        return new BwlDeathTalonWyrmguardNoneHeldTrigger(botAI);
+    }
     static Trigger* bwl_death_talon_wyrmguard_ranged(PlayerbotAI* botAI) { return new BwlDeathTalonWyrmguardRangedTrigger(botAI); }
 };
 

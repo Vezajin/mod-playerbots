@@ -100,6 +100,22 @@ public:
     bool IsActive() override;
 };
 
+class BwlDeathTalonWyrmguardWrongTargetTrigger : public Trigger
+{
+public:
+    BwlDeathTalonWyrmguardWrongTargetTrigger(PlayerbotAI* botAI)
+        : Trigger(botAI, "bwl death talon wyrmguard wrong target") {}
+    bool IsActive() override;
+};
+
+class BwlDeathTalonWyrmguardNoneHeldTrigger : public Trigger
+{
+public:
+    BwlDeathTalonWyrmguardNoneHeldTrigger(PlayerbotAI* botAI)
+        : Trigger(botAI, "bwl death talon wyrmguard none held") {}
+    bool IsActive() override;
+};
+
 class BwlDeathTalonWyrmguardRangedTrigger : public Trigger
 {
 public:

@@ -8,6 +8,7 @@
 #include "BWLActions.h"
 #include "BWLHelpers.h"
 #include "ChooseTargetActions.h"
+#include "GenericSpellActions.h"
 #include "HunterActions.h"
 #include "Playerbots.h"
 #include "ReachTargetActions.h"
@@ -86,4 +87,20 @@ float VaelastraszBurningAdrenalineMultiplier::GetValue(Action* action)
     }
 
     return 1.0f;
+}
+
+float DeathTalonWyrmguardDpsHoldMultiplier::GetValue(Action* action)
+{
+    if (PlayerbotAI::IsTank(bot))
+        return 1.0f;
+
+    if (!dynamic_cast<AttackAction*>(action) &&
+        (!dynamic_cast<CastSpellAction*>(action) || dynamic_cast<CastHealingSpellAction*>(action)))
+        return 1.0f;
+
+    Unit const* target = action->GetTarget();
+    if (!IsDeathTalonWyrmguard(target) || !target->IsInCombat())
+        return 1.0f;
+
+    return IsWyrmguardHoldRunning(bot) && !AreWyrmguardsSplit(bot, GetWyrmguardAttackers(botAI)) ? 0.0f : 1.0f;
 }

@@ -8,6 +8,7 @@
 #include "BWLHelpers.h"
 #include "BWLMultipliers.h"
 #include "Playerbots.h"
+#include <algorithm>
 
 void RaidBwlStrategy::InitTriggers(std::vector<TriggerNode*>& triggers)
 {
@@ -54,6 +55,10 @@ void RaidBwlStrategy::InitTriggers(std::vector<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode("bwl nefarian wild magic", {
         NextAction("ice block", ACTION_RAID) }));
 
+    triggers.push_back(new TriggerNode("bwl death talon wyrmguard wrong target", {
+        NextAction("bwl death talon wyrmguard target own", ACTION_RAID + 1) }));
+    triggers.push_back(new TriggerNode("bwl death talon wyrmguard none held", {
+        NextAction("bwl death talon wyrmguard taunt", ACTION_RAID + 1) }));
     triggers.push_back(new TriggerNode("bwl death talon wyrmguard tank", {
         NextAction("bwl death talon wyrmguard tank move away", ACTION_RAID) }));
     triggers.push_back(new TriggerNode("bwl death talon wyrmguard ranged", {
@@ -65,12 +70,34 @@ void RaidBwlStrategy::InitMultipliers(std::vector<Multiplier*>& multipliers)
     multipliers.push_back(new RazorgoreTankMultiplier(botAI));
     multipliers.push_back(new VaelastraszTankMultiplier(botAI));
     multipliers.push_back(new VaelastraszBurningAdrenalineMultiplier(botAI));
+    multipliers.push_back(new DeathTalonWyrmguardDpsHoldMultiplier(botAI));
+}
+
+// One tank to a Wyrmguard: a tank leaves those another tank holds alone, as long as one is left for it.
+void RaidBwlStrategy::AppendWyrmguardTankExclusions(GuidSet& exclusions)
+{
+    std::vector<Unit*> const wyrmguards = BlackwingLairHelpers::GetWyrmguardAttackers(botAI);
+    Player* bot = botAI->GetBot();
+    bool const hasOwn = std::any_of(wyrmguards.begin(), wyrmguards.end(), [bot](Unit const* unit)
+    {
+        return unit->GetVictim() == bot || !BlackwingLairHelpers::IsHeldByTank(unit);
+    });
+    if (!hasOwn)
+        return;
+
+    for (Unit const* unit : wyrmguards)
+    {
+        if (unit->GetVictim() != bot && BlackwingLairHelpers::IsHeldByTank(unit))
+            exclusions.insert(unit->GetGUID());
+    }
 }
 
 void RaidBwlStrategy::AppendTargetExclusions(GuidSet& exclusions, TargetValueExclusionType type)
 {
     if (type != TargetValueExclusionType::TankTarget)
         return;
+
+    AppendWyrmguardTankExclusions(exclusions);
 
     AiObjectContext* context = botAI->GetAiObjectContext();
     if (Unit* broodlord = AI_VALUE2(Unit*, "find target", "broodlord lashlayer"))

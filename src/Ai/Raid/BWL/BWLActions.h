@@ -89,19 +89,45 @@ public:
 
 // Trash
 
-class BwlDeathTalonWyrmguardTankMoveAwayAction : public MovementAction
+class BwlDeathTalonWyrmguardTargetOwnAction : public AttackAction
 {
 public:
-    BwlDeathTalonWyrmguardTankMoveAwayAction(PlayerbotAI* botAI) : MovementAction(botAI, "bwl death talon wyrmguard tank move away") {}
+    BwlDeathTalonWyrmguardTargetOwnAction(PlayerbotAI* botAI)
+        : AttackAction(botAI, "bwl death talon wyrmguard target own") {}
+    bool Execute(Event event) override;
+};
+
+class BwlDeathTalonWyrmguardTauntAction : public AttackAction
+{
+public:
+    BwlDeathTalonWyrmguardTauntAction(PlayerbotAI* botAI) : AttackAction(botAI, "bwl death talon wyrmguard taunt") {}
+    bool Execute(Event event) override;
+};
+
+class BwlDeathTalonWyrmguardMoveAwayAction : public MovementAction
+{
+public:
+    BwlDeathTalonWyrmguardMoveAwayAction(PlayerbotAI* botAI, std::string const name) : MovementAction(botAI, name) {}
+
+protected:
+    bool MoveAwayFromWyrmguard(Unit* wyrmguard, float distance);
+};
+
+class BwlDeathTalonWyrmguardTankMoveAwayAction : public BwlDeathTalonWyrmguardMoveAwayAction
+{
+public:
+    BwlDeathTalonWyrmguardTankMoveAwayAction(PlayerbotAI* botAI)
+        : BwlDeathTalonWyrmguardMoveAwayAction(botAI, "bwl death talon wyrmguard tank move away") {}
     Unit* GetTarget() override;
     bool isUseful() override;
     bool Execute(Event event) override;
 };
 
-class BwlDeathTalonWyrmguardRangedMoveAwayAction : public MovementAction
+class BwlDeathTalonWyrmguardRangedMoveAwayAction : public BwlDeathTalonWyrmguardMoveAwayAction
 {
 public:
-    BwlDeathTalonWyrmguardRangedMoveAwayAction(PlayerbotAI* botAI) : MovementAction(botAI, "bwl death talon wyrmguard ranged move away") {}
+    BwlDeathTalonWyrmguardRangedMoveAwayAction(PlayerbotAI* botAI)
+        : BwlDeathTalonWyrmguardMoveAwayAction(botAI, "bwl death talon wyrmguard ranged move away") {}
     Unit* GetTarget() override;
     bool Execute(Event event) override;
 };

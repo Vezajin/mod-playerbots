@@ -301,18 +301,56 @@ bool BwlUseHourglassSandAction::Execute(Event /*event*/)
 
 static constexpr float WYRMGUARD_SAFE_DISTANCE = 16.0f;
 
+bool BwlDeathTalonWyrmguardTargetOwnAction::Execute(Event /*event*/)
+{
+    return Attack(GetOwnWyrmguard(bot, GetWyrmguardAttackers(botAI)));
+}
+
+bool BwlDeathTalonWyrmguardTauntAction::Execute(Event event)
+{
+    Unit* wyrmguard = GetWyrmguardToTaunt(bot, GetWyrmguardAttackers(botAI));
+    if (!wyrmguard)
+        return false;
+
+    if (AI_VALUE(Unit*, "current target") != wyrmguard && !Attack(wyrmguard))
+        return false;
+
+    return botAI->DoSpecificAction("taunt spell", event, true);
+}
+
+bool BwlDeathTalonWyrmguardMoveAwayAction::MoveAwayFromWyrmguard(Unit* wyrmguard, float distance)
+{
+    if (!IsMovingAllowed() || IsWaitingForLastMove(MovementPriority::MOVEMENT_FORCED))
+        return false;
+
+    std::vector<Unit*> const drakes = GetUnengagedDrakes(bot);
+    float const baseAngle = wyrmguard->GetAngle(bot);
+
+    // 0, then +-45 and +-90 degrees: the halls are narrow and a drake may stand at the end of the straight line.
+    static constexpr float angleOffsets[] = {0.0f, M_PI_4, -M_PI_4, M_PI_2, -M_PI_2};
+    for (float offset : angleOffsets)
+    {
+        float const angle = baseAngle + offset;
+        float x = bot->GetPositionX() + distance * cos(angle);
+        float y = bot->GetPositionY() + distance * sin(angle);
+        float z = bot->GetPositionZ();
+        if (IsStepTowardsDrake(bot, drakes, x, y) ||
+            !bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(),
+                                                            bot->GetPositionZ(), x, y, z))
+            continue;
+
+        if (MoveTo(bot->GetMapId(), x, y, z, false, false, true, true, MovementPriority::MOVEMENT_FORCED, true))
+            return true;
+    }
+    return false;
+}
+
 Unit* BwlDeathTalonWyrmguardTankMoveAwayAction::GetTarget()
 {
     // Find a nearby wyrmguard within 16 yards being tanked by someone else
-    for (auto const& [guid, ref] : bot->GetThreatMgr().GetThreatenedByMeList())
+    for (Unit* unit : GetWyrmguardAttackers(botAI))
     {
-        Unit* unit = ref->GetOwner();
-        if (!unit || !unit->IsAlive() || unit->GetEntry() != static_cast<uint32>(BlackwingLairNPCs::NPC_DEATH_TALON_WYRMGUARD))
-            continue;
-        if (bot->GetDistance2d(unit) > WYRMGUARD_SAFE_DISTANCE)
-            continue;
-        Unit* victim = unit->GetVictim();
-        if (victim && victim != bot && victim->IsPlayer() && PlayerbotAI::IsTank(victim->ToPlayer()))
+        if (bot->GetDistance2d(unit) <= WYRMGUARD_SAFE_DISTANCE && unit->GetVictim() != bot && IsHeldByTank(unit))
             return unit;
     }
     return nullptr;
@@ -324,11 +362,9 @@ bool BwlDeathTalonWyrmguardTankMoveAwayAction::isUseful()
         return false;
 
     // Must be actively tanking a wyrmguard before moving away from another tank's
-    for (auto const& [guid, ref] : bot->GetThreatMgr().GetThreatenedByMeList())
+    for (Unit const* unit : GetWyrmguardAttackers(botAI))
     {
-        Unit* unit = ref->GetOwner();
-        if (unit && unit->IsAlive() && unit->GetEntry() == static_cast<uint32>(BlackwingLairNPCs::NPC_DEATH_TALON_WYRMGUARD) &&
-            unit->GetVictim() == bot)
+        if (unit->GetVictim() == bot)
             return true;
     }
     return false;
@@ -344,7 +380,7 @@ bool BwlDeathTalonWyrmguardTankMoveAwayAction::Execute(Event /*event*/)
     if (distToTravel <= 0.0f)
         return false;
 
-    return MoveAway(target, distToTravel);
+    return MoveAwayFromWyrmguard(target, distToTravel);
 }
 
 Unit* BwlDeathTalonWyrmguardRangedMoveAwayAction::GetTarget()
@@ -352,11 +388,8 @@ Unit* BwlDeathTalonWyrmguardRangedMoveAwayAction::GetTarget()
     // Find the closest wyrmguard within 16 yards
     Unit* closest = nullptr;
     float closestDist = WYRMGUARD_SAFE_DISTANCE;
-    for (auto const& [guid, ref] : bot->GetThreatMgr().GetThreatenedByMeList())
+    for (Unit* unit : GetWyrmguardAttackers(botAI))
     {
-        Unit* unit = ref->GetOwner();
-        if (!unit || !unit->IsAlive() || unit->GetEntry() != static_cast<uint32>(BlackwingLairNPCs::NPC_DEATH_TALON_WYRMGUARD))
-            continue;
         float dist = bot->GetDistance2d(unit);
         if (dist < closestDist)
         {
@@ -377,5 +410,5 @@ bool BwlDeathTalonWyrmguardRangedMoveAwayAction::Execute(Event /*event*/)
     if (distToTravel <= 0.0f)
         return false;
 
-    return MoveAway(target, distToTravel);
+    return MoveAwayFromWyrmguard(target, distToTravel);
 }
