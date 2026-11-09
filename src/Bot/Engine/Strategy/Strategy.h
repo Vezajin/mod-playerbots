@@ -82,6 +82,8 @@ public:
     virtual void AppendTargetExclusions([[maybe_unused]] GuidSet& exclusions,
                                         [[maybe_unused]] TargetValueExclusionType type) {}
     virtual bool HasTargetExclusions() const { return false; }
+    // A strategy that keeps the bot from talking unless it answers a player (PlayerbotAI::IsSilenced).
+    virtual bool SilencesChat() const { return false; }
     virtual std::string const getName() = 0;
     virtual uint32 GetType() const { return STRATEGY_TYPE_GENERIC; }
     virtual ActionNode* GetAction(std::string const name);

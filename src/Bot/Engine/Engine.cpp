@@ -119,11 +119,13 @@ void Engine::Init()
     Reset();
 
     hasTargetExclusions = false;
+    silencesChat = false;
     for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
     {
         Strategy* strategy = i->second;
         strategyTypeMask |= strategy->GetType();
         hasTargetExclusions |= strategy->HasTargetExclusions();
+        silencesChat |= strategy->SilencesChat();
         strategy->InitMultipliers(multipliers);
         strategy->InitTriggers(triggers);
         for (auto &iter : strategy->actionNodeFactories.creators)
@@ -597,9 +599,15 @@ bool Engine::ListenAndExecute(Action* action, Event event)
         return actionExecuted;
     }
 
-    if (actionExecutionListeners.Before(action, event))
     {
-        actionExecuted = actionExecutionListeners.AllowExecution(action, event) ? action->Execute(event) : true;
+        // An action that runs for a player's chat command, or inside one that does, answers that player.
+        Player* const owner = event.getOwner();
+        PlayerbotAI::ReplyScope const reply(botAI, owner && owner != botAI->GetBot());
+
+        if (actionExecutionListeners.Before(action, event))
+        {
+            actionExecuted = actionExecutionListeners.AllowExecution(action, event) ? action->Execute(event) : true;
+        }
     }
 
     if (botAI->HasStrategy("debug", BOT_STATE_NON_COMBAT))

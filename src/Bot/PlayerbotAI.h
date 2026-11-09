@@ -640,6 +640,23 @@ public:
     std::unordered_set<uint32> lowPriorityQuest;
     time_t bgReleaseAttemptTime = 0;
     ForceRebuffState forceRebuff;
+    // While it lives, the bot counts as answering a player (when replying is true), so a strategy that silences
+    // chat lets its messages through. Scopes nest: the outer state comes back when an inner one ends.
+    class ReplyScope
+    {
+    public:
+        ReplyScope(PlayerbotAI* botAI, bool replying) : _botAI(botAI), _wasReplying(botAI->_replyingToPlayer)
+        {
+            _botAI->_replyingToPlayer = _wasReplying || replying;
+        }
+        ~ReplyScope() { _botAI->_replyingToPlayer = _wasReplying; }
+        ReplyScope(ReplyScope const&) = delete;
+        ReplyScope& operator=(ReplyScope const&) = delete;
+
+    private:
+        PlayerbotAI* _botAI;
+        bool const _wasReplying;
+    };
 
     // Schedules a callback to run once after <delayMs> milliseconds.
     void AddTimedEvent(std::function<void()> callback, uint32 delayMs);
@@ -648,6 +665,10 @@ private:
     static void _fillGearScoreData(Player* player, Item* item, std::vector<uint32>* gearScore, uint32& twoHandScore,
                                    bool mixed = false);
     bool IsTellAllowed(PlayerbotSecurityLevel securityLevel = PLAYERBOT_SECURITY_ALLOW_ALL);
+    // True when a strategy silences chat and the bot is not answering a player. Tells, party, raid, say and yell
+    // through this class are then dropped.
+    bool IsSilenced() const;
+    bool _replyingToPlayer = false;
     void UpdateAIGroupMaster();
     Item* FindItemInInventory(std::function<bool(ItemTemplate const*)> checkItem) const;
     void HandleCommands();

@@ -1124,6 +1124,8 @@ void PlayerbotAI::HandleCommand(uint32 type, std::string const text, Player* fro
         (filtered.size() > 3 && filtered.substr(0, 3) == "do "))
     {
         std::string const action = filtered.substr(filtered.find(" ") + 1);
+        // The do event has no owner, so this scope is what lets the action and its failure report answer the player.
+        ReplyScope const reply(this, fromPlayer != bot);
         DoSpecificAction(action);
     }
     else if (type != CHAT_MSG_WHISPER && filtered.size() > 6 && filtered.substr(0, 6) == "queue ")
@@ -1180,6 +1182,8 @@ void PlayerbotAI::HandleCommand(uint32 type, std::string const text, Player* fro
             {
                 std::string message = PlayerbotTextMgr::instance().GetBotTextOrDefault(
                     "logout_start", "I'm logging out!", {});
+                // Closes before LogoutPlayerBot, which deletes this PlayerbotAI.
+                ReplyScope const reply(this, true);
                 TellMaster(message);
             }
 
@@ -1189,6 +1193,7 @@ void PlayerbotAI::HandleCommand(uint32 type, std::string const text, Player* fro
         {
             std::string message = PlayerbotTextMgr::instance().GetBotTextOrDefault(
                 "bot_rndbot_no_logout", "You can't command me to logout!", {});
+            ReplyScope const reply(this, true);
             TellMaster(message);
         }
     }
@@ -1201,6 +1206,7 @@ void PlayerbotAI::HandleCommand(uint32 type, std::string const text, Player* fro
         {
             std::string message = PlayerbotTextMgr::instance().GetBotTextOrDefault(
                 "logout_cancel", "Logout cancelled!", {});
+            ReplyScope const reply(this, true);
             TellMaster(message);
         }
 
@@ -3037,7 +3043,7 @@ bool PlayerbotAI::SayToChannel(std::string const& msg, ChatChannelId const& chan
 
 bool PlayerbotAI::SayToParty(std::string const& msg)
 {
-    if (!bot->GetGroup())
+    if (!bot->GetGroup() || IsSilenced())
         return false;
 
     WorldPacket data;
@@ -3054,7 +3060,7 @@ bool PlayerbotAI::SayToParty(std::string const& msg)
 
 bool PlayerbotAI::SayToRaid(std::string const& msg)
 {
-    if (!bot->GetGroup() || !bot->GetGroup()->isRaidGroup())
+    if (!bot->GetGroup() || !bot->GetGroup()->isRaidGroup() || IsSilenced())
         return false;
 
     WorldPacket data;
@@ -3071,6 +3077,9 @@ bool PlayerbotAI::SayToRaid(std::string const& msg)
 
 bool PlayerbotAI::Yell(std::string const& msg)
 {
+    if (IsSilenced())
+        return false;
+
     if (bot->GetTeamId() == TeamId::TEAM_ALLIANCE)
     {
         bot->Yell(msg, LANG_COMMON);
@@ -3085,6 +3094,9 @@ bool PlayerbotAI::Yell(std::string const& msg)
 
 bool PlayerbotAI::Say(std::string const& msg)
 {
+    if (IsSilenced())
+        return false;
+
     if (bot->GetTeamId() == TeamId::TEAM_ALLIANCE)
     {
         bot->Say(msg, LANG_COMMON);
@@ -3176,6 +3188,9 @@ bool PlayerbotAI::IsTellAllowed(PlayerbotSecurityLevel securityLevel)
     if (!master || master->IsBeingTeleported())
         return false;
 
+    if (IsSilenced())
+        return false;
+
     if (!GetSecurity()->CheckLevelFor(securityLevel, true, master))
         return false;
 
@@ -3186,6 +3201,11 @@ bool PlayerbotAI::IsTellAllowed(PlayerbotSecurityLevel securityLevel)
         return false;
 
     return true;
+}
+
+bool PlayerbotAI::IsSilenced() const
+{
+    return !_replyingToPlayer && engines[BOT_STATE_NON_COMBAT] && engines[BOT_STATE_NON_COMBAT]->SilencesChat();
 }
 
 bool PlayerbotAI::TellMaster(std::ostringstream& stream, PlayerbotSecurityLevel securityLevel)
